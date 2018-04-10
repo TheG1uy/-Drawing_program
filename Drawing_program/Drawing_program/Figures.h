@@ -141,6 +141,13 @@ public:
 				p2->Draw(gr, col);
 				gr->DrawLine(pen, p1->getX(), p1->getY(), p2->getX(), p2->getY());
 
+
+				if (!stack.isEmpty) {
+					curr = stack.pop();
+					if (curr.pS == nullptr) curr.pS = (TRoot*)p2;
+					else curr.pE= (TRoot*)p2;
+					stack.push(curr);
+				}
 			}
 
 		}
