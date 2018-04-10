@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Drawing_program.h"
 namespace Drawing_program {
 
 	using namespace System;
