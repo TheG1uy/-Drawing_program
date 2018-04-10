@@ -66,7 +66,7 @@ class TChart :public TRoot {
 protected:
 	TRoot *pStart;
 	TRoot *pEnd;
-	TStack<TCurrLine> st;
+	TStack<TCurrLine> stack;
 public:
 	TChart(TRoot *_pStart = nullptr, TRoot *_pEnd = nullptr) {
 		pStart = _pStart;
@@ -106,11 +106,49 @@ public:
 			return (TRoot*)tC;
 		}
 	}
-
-
 	virtual void Draw(Graphics ^gr, Color col) {
+		TRoot *tmp;
+		Pen^ pen = gcnew Pen(col);
+		TCurrLine curr;
+		curr.tC = this;
+		curr.pS = curr.pE = nullptr;
+		stack.clear();
+		stack.push(curr);
+		while (!stack.isEmpty()) {
+			curr = stack.pop();
+			while (curr.pE == nullptr) {
+				if (dynamic_cast<TPoint *>(dynamic_cast<TChart *>(curr.tC)->pStart) != nullptr)
+					curr.pS = dynamic_cast<TChart *>(curr.tC)->pStart;
+				else {
+					stack.push(curr);
+					curr.tC = dynamic_cast<TChart *>(curr.tC)->pStart;
+				}
+			}
+			if (curr.pE == nullptr) {
+				if (dynamic_cast<TPoint *>(dynamic_cast<TChart *>(curr.tC)->pEnd) != nullptr)
+					curr.pE = dynamic_cast<TChart *>(curr.tC)->pEnd;
+				else {
 
+					stack.push(curr);
+					curr.tC = dynamic_cast<TChart *>(curr.tC)->pEnd;
+					curr.pS = nullptr;
+					stack.push(curr);
+				}
+			}
+			if (curr.pS != nullptr && curr.pE != nullptr) {
+				TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
+				p1->Draw(gr, col);
+				p2->Draw(gr, col);
+				gr->DrawLine(pen, p1->getX(), p1->getY(), p2->getX(), p2->getY());
+
+			}
+
+		}
 	}
+
+
+	
+	
 
 	virtual void Move(Graphics ^gr, int dx, int dy) {}
 };
