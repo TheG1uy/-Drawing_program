@@ -15,10 +15,21 @@ namespace Drawing_program {
 	public ref class Drawing_program : public System::Windows::Forms::Form
 	{
 	public:
+		int x1, y1, x2, y2;
+		Graphics^ gr;
+		bool flag=false;
+		TChart *pFirst;
+		int i;
+	private: System::Windows::Forms::CheckBox^  checkBox1;
+	public:
+		TFind *find;
 		Drawing_program(void)
 		{
-			TChart p;
+			i = 0;
 			InitializeComponent();
+			gr = CreateGraphics();
+			pFirst = nullptr;
+			find = new TFind();
 			//
 			//TODO: добавьте код конструктора
 			//
@@ -35,7 +46,7 @@ namespace Drawing_program {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::Label^  label1;
+
 	protected:
 
 	private:
@@ -51,27 +62,31 @@ namespace Drawing_program {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
 			this->SuspendLayout();
 			// 
-			// label1
+			// checkBox1
 			// 
-			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(165, 100);
-			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(35, 13);
-			this->label1->TabIndex = 0;
-			this->label1->Text = L"label1";
+			this->checkBox1->AutoSize = true;
+			this->checkBox1->Location = System::Drawing::Point(586, 2);
+			this->checkBox1->Name = L"checkBox1";
+			this->checkBox1->Size = System::Drawing::Size(81, 17);
+			this->checkBox1->TabIndex = 0;
+			this->checkBox1->Text = L"GOD_MOD";
+			this->checkBox1->UseVisualStyleBackColor = true;
+			this->checkBox1->CheckedChanged += gcnew System::EventHandler(this, &Drawing_program::checkBox1_CheckedChanged);
 			// 
 			// Drawing_program
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->BackColor = System::Drawing::Color::White;
 			this->ClientSize = System::Drawing::Size(678, 458);
-			this->Controls->Add(this->label1);
+			this->Controls->Add(this->checkBox1);
 			this->Name = L"Drawing_program";
 			this->Text = L"Drawing_program";
 			this->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &Drawing_program::Drawing_program_MouseDown);
+			this->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &Drawing_program::Drawing_program_MouseMove);
 			this->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &Drawing_program::Drawing_program_MouseUp);
 			this->ResumeLayout(false);
 			this->PerformLayout();
@@ -80,10 +95,82 @@ namespace Drawing_program {
 #pragma endregion
 	
 	private: System::Void Drawing_program_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
-		label1->Text = "aaaa";
+		if (!checkBox1->Checked){
+			x1 = x2 = e->X;
+			y1 = y2 = e->Y;
+			gr->FillEllipse(Brushes::Black, x1 - 2, y1 - 2, 5, 5);
+			flag = true;
+		}
+		else {
+			
+		}
 	}
 	private: System::Void Drawing_program_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
-		label1->Text = "dddd";
+		flag = false;
+		if (!checkBox1->Checked) {
+			if (pFirst == nullptr) {
+				gr->FillEllipse(Brushes::Black, x2 - 2, y2 - 2, 5, 5);
+				TPoint *p1 = new TPoint(x1, y1), *p2 = new TPoint(x2, y2);
+				pFirst = new TChart(p1, p2);
+			}
+
+			else {
+				*find = pFirst->Find(x1, x2, y1, y2);
+				if (find->pS != nullptr && find->pE != nullptr) {
+					TPoint  *p1, *p2;
+					if (find->Start == 1) p1 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pS)->getBegin());
+					if (find->Start == 2) p1 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pS)->getEnd());
+					if (find->End == 1) p2 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pE)->getBegin());
+					if (find->End == 2) p2 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pE)->getEnd());
+					TChart *tmp = new TChart(p1, p2);
+					if (find->End == 1) dynamic_cast<TChart*>(find->pE)->setStart(tmp);
+					if (find->End == 2) dynamic_cast<TChart*>(find->pE)->setEnd(tmp);
+					gr->Clear(Color::White);
+					pFirst->Draw(gr, Color::Black);
+					return;
+				}
+				if (find->pS != nullptr) {
+					TPoint  *p1, *p2 = new TPoint(x2, y2);
+					if (find->Start == 1) p1 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pS)->getBegin());
+					if (find->Start == 2) p1 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pS)->getEnd());
+					TChart *tmp = new TChart(p2, p1);
+					if (find->Start == 1) dynamic_cast<TChart*>(find->pS)->setStart(tmp);
+					if (find->Start == 2) dynamic_cast<TChart*>(find->pS)->setEnd(tmp);
+					gr->Clear(Color::White);
+					pFirst->Draw(gr, Color::Black);
+				}
+				if (find->pE != nullptr) {
+					TPoint  *p1 = new TPoint(x1, y1), *p2;
+					if (find->End == 1) p2 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pE)->getBegin());
+					if (find->End == 2) p2 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pE)->getEnd());
+					TChart *tmp = new TChart(p1, p2);
+					if (find->End == 1) dynamic_cast<TChart*>(find->pE)->setStart(tmp);
+					if (find->End == 2) dynamic_cast<TChart*>(find->pE)->setEnd(tmp);
+					gr->Clear(Color::White);
+					pFirst->Draw(gr, Color::Black);
+				}
+
+			}
+		}
 	}
-	};
+	private: System::Void Drawing_program_MouseMove(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
+		if (flag) {
+			gr->DrawLine(Pens::White, x1, y1, x2, y2);
+			x2 = e->X;
+			y2 = e->Y;
+			gr->DrawLine(Pens::Black, x1, y1, x2, y2);
+			gr->FillEllipse(Brushes::Black, x1 - 2, y1 - 2, 5, 5);
+			if (pFirst!=nullptr)
+			pFirst->Draw(gr, Color::Black);
+		}
+	}
+	private: System::Void checkBox1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+		
+		
+		if (checkBox1->Checked) { if (pFirst != nullptr) pFirst->Draw(gr, Color::AntiqueWhite); }
+			
+		else if (pFirst != nullptr) pFirst->Draw(gr, Color::Black);
+		
+	}
+};
 }

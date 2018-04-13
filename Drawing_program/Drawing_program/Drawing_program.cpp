@@ -6,7 +6,7 @@ using namespace System::Windows::Forms;
 
 [STAThreadAttribute]
 
-void main(array<String^>^ args) {
+void main() {
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);
 	Drawing_program::Drawing_program form;
