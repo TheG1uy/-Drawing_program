@@ -19,6 +19,7 @@ namespace Drawing_program {
 		Graphics^ gr;
 		bool flag=false;
 		TChart *pFirst;
+		TRoot *pCurr;
 		int i;
 	private: System::Windows::Forms::CheckBox^  checkBox1;
 	public:
@@ -102,6 +103,7 @@ namespace Drawing_program {
 			flag = true;
 		}
 		else {
+			pCurr=pFirst->Excretion(gr,e->X,e->Y);
 			
 		}
 	}

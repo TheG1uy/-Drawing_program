@@ -145,13 +145,14 @@ public:
 					stack.push(curr);
 				}
 			}
-			if (curr.pS!=nullptr && curr.pE != nullptr && curr.tC->visible )
+			if (curr.pS!=nullptr && curr.pE != nullptr  )
 				if (curr.pS->whatIsIt == 1 && curr.pE->whatIsIt == 1){
 					TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
-					p1->Draw(gr, col);
-					p2->Draw(gr, col);
-					gr->DrawLine(pen, p1->getX(), p1->getY(), p2->getX(), p2->getY());
-
+					if (curr.tC->visible) {
+						p1->Draw(gr, col);
+						p2->Draw(gr, col);
+						gr->DrawLine(pen, p1->getX(), p1->getY(), p2->getX(), p2->getY());
+					}
 
 					if (!stack.isEmpty()) {
 						curr = stack.pop();
@@ -197,33 +198,35 @@ public:
 					stack.push(curr);
 				}
 			}
-			if (curr.pS != nullptr && curr.pE != nullptr)
+			if (curr.pS != nullptr && curr.pE != nullptr )
 			if (curr.pS->whatIsIt == 1 && curr.pE->whatIsIt == 1) {
 				TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
-				if (abs(p1->getX() - x1) < Epsilon && abs(p1->getY() - y1 ) < Epsilon && !flag1) {
-					find.pS = curr.tC; 
-					find.Start = 1;
-					flag1 = true;
-				}
-				if (abs(p2->getX() - x1)<Epsilon && abs(p2->getY() - y1 )<Epsilon && !flag1) {
-					find.pS = curr.tC;
-					find.Start = 2;
-					flag1 = true;
-				}
-				if (abs(p1->getX() - x2)<Epsilon && abs(p1->getY() - y2 )<Epsilon && !flag2) {
-					find.pE = curr.tC;
-					find.End = 1;
-					flag2 = true;
-				}
-				if (abs(p2->getX() - x2)<Epsilon && abs(p2->getY() - y2 )<Epsilon && !flag2) {
-					find.pE = curr.tC;
-					find.End = 2;
-					flag2 = true;
+				if (curr.tC->visible) {
+					if (abs(p1->getX() - x1) < Epsilon && abs(p1->getY() - y1) < Epsilon && !flag1) {
+						find.pS = curr.tC;
+						find.Start = 1;
+						flag1 = true;
+					}
+					if (abs(p2->getX() - x1) < Epsilon && abs(p2->getY() - y1) < Epsilon && !flag1) {
+						find.pS = curr.tC;
+						find.Start = 2;
+						flag1 = true;
+					}
+					if (abs(p1->getX() - x2) < Epsilon && abs(p1->getY() - y2) < Epsilon && !flag2) {
+						find.pE = curr.tC;
+						find.End = 1;
+						flag2 = true;
+					}
+					if (abs(p2->getX() - x2) < Epsilon && abs(p2->getY() - y2) < Epsilon && !flag2) {
+						find.pE = curr.tC;
+						find.End = 2;
+						flag2 = true;
+					}
 				}
 				if (!stack.isEmpty()) {
 					curr = stack.pop();
 					if (curr.pS == nullptr) curr.pS = (TRoot*)p2;
-					else curr.pE = (TRoot*)p1;
+					else curr.pE = (TRoot*)p2;
 					stack.push(curr);
 				}
 			}
@@ -233,7 +236,63 @@ public:
 	
 	}
 	
-	
+	TRoot* Excretion(Graphics^ gr,int x1, int y1) {
+		TRoot *tmp;
+		int Epsilon = 10;
+		TCurrLine curr;
+		curr.tC = this;
+		curr.pS = curr.pE = nullptr;
+		stack.clear();
+		stack.push(curr);
+		while (!stack.isEmpty()) {
+			curr = stack.pop();
+			while (curr.pS == nullptr) {
+				if (dynamic_cast<TChart *>(curr.tC)->pStart->whatIsIt == 1)
+					curr.pS = dynamic_cast<TChart *>(curr.tC)->pStart;
+				else {
+					stack.push(curr);
+					curr.tC = dynamic_cast<TChart *>(curr.tC)->pStart;
+				}
+			}
+			if (curr.pE == nullptr) {
+				if (dynamic_cast<TChart *>(curr.tC)->pEnd->whatIsIt == 1)
+					curr.pE = dynamic_cast<TChart *>(curr.tC)->pEnd;
+				else {
+
+					stack.push(curr);
+					curr.tC = dynamic_cast<TChart *>(curr.tC)->pEnd;
+					curr.pS = nullptr;
+					stack.push(curr);
+				}
+			}
+			if (curr.pS != nullptr && curr.pE != nullptr )
+				if (curr.pS->whatIsIt == 1 && curr.pE->whatIsIt == 1) {
+					TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
+					if (curr.tC->visible) {
+						TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
+						float x, y, c, d;
+						x = p1->getY() - p2->getY();
+						y = p2->getX() - p1->getX();
+						c = p1->getX()*(p2->getY() - p1->getY()) - p1->getY()*(p2->getX() - p1->getX());
+						d = fabs(x1*x + y1*y + c) / sqrt(x*x + y*y);
+						if (d < Epsilon / 3) {
+							p1->Draw(gr, Color::Aqua);
+							p2->Draw(gr, Color::Aqua);
+							gr->DrawLine(Pens::Aqua, p1->getX(), p1->getY(), p2->getX(), p2->getY());
+							return curr.tC;
+
+						}
+					}
+					if (!stack.isEmpty()) {
+						curr = stack.pop();
+						if (curr.pS == nullptr) curr.pS = (TRoot*)p2;
+						else curr.pE = (TRoot*)p2;
+						stack.push(curr);
+					}
+				}
+
+		}
+	}
 
 	virtual void Move(Graphics ^gr, int dx, int dy) {}
 };
