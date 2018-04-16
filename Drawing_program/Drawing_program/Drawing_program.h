@@ -22,6 +22,7 @@ namespace Drawing_program {
 		TRoot *pCurr;
 		int i;
 	private: System::Windows::Forms::CheckBox^  checkBox1;
+	private: System::Windows::Forms::Button^  button1;
 	public:
 		TFind *find;
 		Drawing_program(void)
@@ -64,6 +65,7 @@ namespace Drawing_program {
 		void InitializeComponent(void)
 		{
 			this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
+			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// checkBox1
@@ -77,12 +79,24 @@ namespace Drawing_program {
 			this->checkBox1->UseVisualStyleBackColor = true;
 			this->checkBox1->CheckedChanged += gcnew System::EventHandler(this, &Drawing_program::checkBox1_CheckedChanged);
 			// 
+			// button1
+			// 
+			this->button1->Location = System::Drawing::Point(586, 25);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(80, 22);
+			this->button1->TabIndex = 1;
+			this->button1->Text = L"Delete";
+			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Visible = false;
+			this->button1->Click += gcnew System::EventHandler(this, &Drawing_program::button1_Click);
+			// 
 			// Drawing_program
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::White;
 			this->ClientSize = System::Drawing::Size(678, 458);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->checkBox1);
 			this->Name = L"Drawing_program";
 			this->Text = L"Drawing_program";
@@ -118,6 +132,11 @@ namespace Drawing_program {
 
 			else {
 				*find = pFirst->Find(x1, x2, y1, y2);
+				if (find->pS == nullptr && find->pE == nullptr) {
+					gr->Clear(Color::White);
+					pFirst->Draw(gr, Color::Black);
+				}
+
 				if (find->pS != nullptr && find->pE != nullptr) {
 					TPoint  *p1, *p2;
 					if (find->Start == 1) p1 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pS)->getBegin());
@@ -169,10 +188,21 @@ namespace Drawing_program {
 	private: System::Void checkBox1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
 		
 		
-		if (checkBox1->Checked) { if (pFirst != nullptr) pFirst->Draw(gr, Color::AntiqueWhite); }
+		if (checkBox1->Checked) { if (pFirst != nullptr) pFirst->Draw(gr, Color::AntiqueWhite); button1->Visible = true; }
 			
-		else if (pFirst != nullptr) pFirst->Draw(gr, Color::Black);
+		else if (pFirst != nullptr) {
+			pFirst->Draw(gr, Color::Black);
+			button1->Visible = false;
+		}
 		
 	}
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+	if (pCurr != nullptr) {
+		pCurr->visible = false;
+		gr->Clear(Color::White);
+		pFirst->Draw(gr, Color::AntiqueWhite);
+		pCurr = nullptr;
+	}
+}
 };
 }
