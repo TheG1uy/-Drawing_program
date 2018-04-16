@@ -132,6 +132,11 @@ namespace Drawing_program {
 
 			else {
 				*find = pFirst->Find(x1, x2, y1, y2);
+				if (find->pS != nullptr && find->pS->visible == false && find->pE != nullptr && find->pE->visible == false)  find->pE->visible == true;
+				else {
+					if (find->pS != nullptr && find->pS->visible == false) find->pS = nullptr;
+					if (find->pE != nullptr && find->pE->visible == false) find->pE = nullptr;
+				}
 				if (find->pS == nullptr && find->pE == nullptr) {
 					gr->Clear(Color::White);
 					pFirst->Draw(gr, Color::Black);
@@ -143,9 +148,12 @@ namespace Drawing_program {
 					if (find->Start == 2) p1 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pS)->getEnd());
 					if (find->End == 1) p2 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pE)->getBegin());
 					if (find->End == 2) p2 = dynamic_cast<TPoint*>(dynamic_cast<TChart*>(find->pE)->getEnd());
-					TChart *tmp = new TChart(p1, p2);
-					if (find->End == 1) dynamic_cast<TChart*>(find->pE)->setStart(tmp);
-					if (find->End == 2) dynamic_cast<TChart*>(find->pE)->setEnd(tmp);
+					if (pFirst->CopyrightedTest(p1->getX(), p1->getY(), p2->getX(), p2->getY())) {
+						TChart *tmp = new TChart(p1, p2);
+						if (find->End == 1) dynamic_cast<TChart*>(find->pE)->setStart(tmp);
+						if (find->End == 2) dynamic_cast<TChart*>(find->pE)->setEnd(tmp);
+
+					}
 					gr->Clear(Color::White);
 					pFirst->Draw(gr, Color::Black);
 					return;

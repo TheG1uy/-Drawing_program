@@ -117,7 +117,6 @@ public:
 		}
 	}
 	virtual void Draw(Graphics ^gr, Color col) {
-		TRoot *tmp;
 		Pen^ pen = gcnew Pen(col);
 		TCurrLine curr;
 		curr.tC = this;
@@ -168,7 +167,6 @@ public:
 
 	TFind Find(int x1,int x2,int y1,int y2) {
 		bool flag1 = false, flag2 = false;
-		TRoot *tmp;
 		int Epsilon = 10;
 		TCurrLine curr;
 		TFind find;
@@ -201,7 +199,7 @@ public:
 			if (curr.pS != nullptr && curr.pE != nullptr )
 			if (curr.pS->whatIsIt == 1 && curr.pE->whatIsIt == 1) {
 				TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
-				if (curr.tC->visible) {
+				
 					if (abs(p1->getX() - x1) < Epsilon && abs(p1->getY() - y1) < Epsilon && !flag1) {
 						find.pS = curr.tC;
 						find.Start = 1;
@@ -222,7 +220,7 @@ public:
 						find.End = 2;
 						flag2 = true;
 					}
-				}
+				
 				if (!stack.isEmpty()) {
 					curr = stack.pop();
 					if (curr.pS == nullptr) curr.pS = (TRoot*)p2;
@@ -237,7 +235,6 @@ public:
 	}
 	
 	TRoot* Excretion(Graphics^ gr,int x1, int y1) {
-		TRoot *tmp;
 		int Epsilon = 10;
 		TCurrLine curr;
 		curr.tC = this;
@@ -293,6 +290,48 @@ public:
 
 		}
 	}
+	bool CopyrightedTest(int x1, int y1, int x2, int y2) {
+		TCurrLine curr;
+		curr.tC = this;
+		curr.pS = curr.pE = nullptr;
+		stack.clear();
+		stack.push(curr);
+		while (!stack.isEmpty()) {
+			curr = stack.pop();
+			while (curr.pS == nullptr) {
+				if (dynamic_cast<TChart *>(curr.tC)->pStart->whatIsIt == 1)
+					curr.pS = dynamic_cast<TChart *>(curr.tC)->pStart;
+				else {
+					stack.push(curr);
+					curr.tC = dynamic_cast<TChart *>(curr.tC)->pStart;
+				}
+			}
+			if (curr.pE == nullptr) {
+				if (dynamic_cast<TChart *>(curr.tC)->pEnd->whatIsIt == 1)
+					curr.pE = dynamic_cast<TChart *>(curr.tC)->pEnd;
+				else {
 
+					stack.push(curr);
+					curr.tC = dynamic_cast<TChart *>(curr.tC)->pEnd;
+					curr.pS = nullptr;
+					stack.push(curr);
+				}
+			}
+			if (curr.pS != nullptr && curr.pE != nullptr)
+				if (curr.pS->whatIsIt == 1 && curr.pE->whatIsIt == 1) {
+					TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
+					if (p1->getX() == x1 && p1->getY() == y1 && p2->getX() == x2 && p2->getY() == y2) { curr.tC->visible = true;  return false; }
+					if (p2->getX() == x1 && p2->getY() == y1 && p1->getX() == x2 && p1->getY() == y2) { curr.tC->visible = true;  return false; }
+					if (!stack.isEmpty()) {
+						curr = stack.pop();
+						if (curr.pS == nullptr) curr.pS = (TRoot*)p2;
+						else curr.pE = (TRoot*)p2;
+						stack.push(curr);
+					}
+				}
+
+		}
+		return true;
+	}
 	virtual void Move(Graphics ^gr, int dx, int dy) {}
 };
