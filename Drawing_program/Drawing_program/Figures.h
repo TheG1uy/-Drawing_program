@@ -236,6 +236,8 @@ public:
 	}
 	void ClearChart() {
 		TStack<TCurrLine> st;
+		TRoot **mas;
+		int size = 0;
 		TCurrLine curr;
 		curr.tC = this;
 		curr.pS = curr.pE = nullptr;
@@ -267,6 +269,7 @@ public:
 				if (curr.pS->whatIsIt == 1 && curr.pE->whatIsIt == 1) {
 					TPoint *p1 = dynamic_cast<TPoint *>(curr.pS), *p2 = dynamic_cast<TPoint *>(curr.pE);
 					st.push(curr);
+					size += 2;
 					if (!stack.isEmpty()) {
 						curr = stack.pop();
 						if (curr.pS == nullptr) curr.pS = (TRoot*)p2;
@@ -276,16 +279,21 @@ public:
 				}
 
 		}
-		
+		mas = new TRoot*[size];
+		int i = 0;
 		while (!st.isEmpty()) {
 			curr = st.pop();
 			delete curr.tC;
-			//delete curr.pE;
-			//delete curr.pS;
-			//curr.tC = nullptr;
-			//curr.pE = nullptr;
-		//	curr.pS = nullptr;
+			mas[i] = curr.pS;
+			i++;
+			mas[i] = curr.pE;
+			i++;
 		}
+		for (i = 0; i < size - 1; i++)
+			for (int j = i + 1; j < size; j++)
+				if (mas[i] == mas[j]) mas[j] = nullptr;
+		for (i = 0; i < size; i++)
+			if (mas[i] != nullptr) delete mas[i];
 	}
 	TChart* CreateFigure(FILE *fn) {
 		TStack<int> std;
